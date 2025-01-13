@@ -6,6 +6,7 @@
     <title>Movement Breaks</title>
 </head>
 <body>
+    <h1>Movement Breaks</h1>
     <div class="timer-container">
         <div id="timer-display">
             <p id="timer"></p>
@@ -16,7 +17,11 @@
         </div>
     </div>
 
-    <div class="exercise-container">
+    <div class="exercise-container" style="display: none">
+        <img id=exercise-img src="" alt="">
+        <h2 id="exercise-name"></h2>
+        <ul id="exercise-instructions"></ul>
+        <button id="next-button">Next Exercise</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"
@@ -25,6 +30,7 @@
     src="https://code.jquery.com/jquery-3.4.1.min.js"
     integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
     crossorigin="anonymous"></script>
-    <script src="static/app.js"></script>
+    <script src=" https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js "></script>
+    <script src="static/timer.js"></script>
 </body>
 </html>
