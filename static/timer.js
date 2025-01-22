@@ -7,26 +7,31 @@ const $exerciseName = $('#exercise-name');
 const $exerciseImg = $('#exercise-img');
 const $instructions = $('#exercise-instructions');
 
+let workTime = 5;
+let breakTime = 5;
 let secLeft;
 let interval;
 let exercises;
 let exerciseIdx = 0;
+let workPhase = true;
 
 function startTimer() {
-    $(this).prop('disabled', true);
-    secLeft = 5;
+    $(this).prop('disabled', true); 
+    secLeft = workPhase ? workTime : breakTime;
     displayTime(secLeft)
     interval = setInterval(countDown, 1000);
 }
 
 function countDown() {
     secLeft--;
-    console.log(secLeft)
-    displayTime(secLeft)
+    displayTime(secLeft);
     
     if (secLeft === 0) {
-        clearInterval(interval)
-        startExerciseBreak()
+        clearInterval(interval);
+        workPhase = !workPhase;
+        if (!workPhase) {
+            startExerciseBreak();
+        }
     }
 }
 
@@ -52,6 +57,7 @@ function resetTimer() {
 
 async function startExerciseBreak() {
     console.log("start break")
+    startTimer();
     try {
         res = await axios.get('./exercises');
         exercises = _.shuffle(res.data);
