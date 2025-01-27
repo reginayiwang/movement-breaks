@@ -18,7 +18,7 @@ let workPhase = true;
 function startTimer() {
     $(this).prop('disabled', true); 
     secLeft = workPhase ? workTime : breakTime;
-    displayTime(secLeft)
+    // displayTime(secLeft)
     interval = setInterval(countDown, 1000);
 }
 
@@ -87,3 +87,4 @@ function showNextExercise() {
 $startButton.on('click', startTimer);
 $resetButton.on('click', resetTimer);
 $nextButton.on('click', showNextExercise);
+$( document ).ready(() => displayTime(workTime));
