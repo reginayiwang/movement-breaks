@@ -1,8 +1,11 @@
 """Models for Movement Breaks"""
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 
 db = SQLAlchemy()
+
+bcrypt = Bcrypt()
 
 def connect_db(app):
     """Connect to database"""
@@ -26,6 +29,24 @@ class User(db.Model):
     break_length = db.Column(db.Integer, default=5)
     equipment = db.relationship('Equipment', secondary='equipment_preferences', cascade='all, delete')
     targets = db.relationship('Target', secondary='target_preferences', cascade='all, delete')
+
+    @classmethod
+    def register(cls, username, password):
+        """Register new user"""
+
+        password_hash = bcrypt.generate_password_hash(password).decode("utf8")
+        return cls(username=username, password_hash=password_hash)
+    
+    @classmethod
+    def login(cls, username, password):
+        """Handle user authentication"""
+
+        user = User.query.filter_by(username=username).one()
+
+        if user and bcrypt.check_password_hash(user.password_hash, password):
+            return user
+        else:
+            return False
 
 class Equipment(db.Model):
     "Equipment model"
