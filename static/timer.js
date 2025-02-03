@@ -7,8 +7,6 @@ const $exerciseName = $('#exercise-name');
 const $exerciseImg = $('#exercise-img');
 const $instructions = $('#exercise-instructions');
 
-let workTime = 5;
-let breakTime = 5;
 let secLeft;
 let interval;
 let exercises;
@@ -17,8 +15,7 @@ let workPhase = true;
 
 function startTimer() {
     $(this).prop('disabled', true); 
-    secLeft = workPhase ? workTime : breakTime;
-    // displayTime(secLeft)
+    secLeft = (workPhase ? workMins : breakMins) * 60;
     interval = setInterval(countDown, 1000);
 }
 
@@ -35,8 +32,8 @@ function countDown() {
     }
 }
 
-function displayTime(time) {
-    $timerDisplay.text(formatTime(time));
+function displayTime(seconds) {
+    $timerDisplay.text(formatTime(seconds));
 }
 
 function formatTime(seconds) {
@@ -50,18 +47,15 @@ function formatTime(seconds) {
 function resetTimer() {
     $exerciseCont.hide();
     $startButton.prop('disabled', false);
-    secLeft = 5;
-    displayTime(secLeft);
+    displayTime(workMins * 60);
     clearInterval(interval);
 }
 
 async function startExerciseBreak() {
-    console.log("start break")
     startTimer();
     try {
         res = await axios.get('./exercises');
         exercises = _.shuffle(res.data);
-        console.log(exercises)
         exerciseIdx = 0;
         showNextExercise();
     } catch (e) {
@@ -71,7 +65,6 @@ async function startExerciseBreak() {
 }
 
 function showNextExercise() {
-    console.log("show next")
     exercise = exercises[exerciseIdx % exercises.length];
     $exerciseImg.attr('src', exercise['gifUrl']);
     $exerciseImg.attr('alt', exercise['name']);
@@ -87,4 +80,4 @@ function showNextExercise() {
 $startButton.on('click', startTimer);
 $resetButton.on('click', resetTimer);
 $nextButton.on('click', showNextExercise);
-$( document ).ready(() => displayTime(workTime));
+$( document ).ready(() => displayTime(workMins * 60));

@@ -19,4 +19,19 @@
         <button class="btn btn-secondary" id="next-button">Next Exercise</button>
     </div> 
 </div>
+<script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous"></script>
+    <script src=" https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js "></script>
+<script>
+    {% if user %}
+        let workMins = {{ user.work_length|tojson }};
+        let breakMins = {{ user.break_length|tojson }};
+    {% else %}
+        let workMins = 60;
+        let breakMins = 5;
+    {% endif %}
+</script>
+<script src="static/timer.js"></script>
 {% endblock %}

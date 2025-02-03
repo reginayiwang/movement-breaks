@@ -24,7 +24,8 @@ connect_db(app)
 
 @app.route('/')
 def show_timer():
-    return render_template('timer.html') 
+    user = User.query.get(session['user_id']) if 'user_id' in session else None
+    return render_template('timer.html', user=user) 
 
 @app.route('/exercises')
 def get_exercises():
