@@ -1,8 +1,8 @@
 """Flask app for Movement Breaks (productivity timer with guided exercise breaks)"""
 
 from flask import Flask, render_template, jsonify, abort, redirect, session
-from models import db, connect_db, User
-from forms import RegisterForm, LoginForm
+from models import db, connect_db, User, Equipment, Target
+from forms import RegisterForm, LoginForm, SettingsForm
 from sqlalchemy.exc import IntegrityError
 import requests
 import config
@@ -75,6 +75,41 @@ def login_user():
 def logout_user():
     session.pop('user_id')
     return redirect('/')
+
+@app.route('/settings', methods=['GET', 'POST'])
+def change_settings():
+    if 'user_id' in session:
+        form = SettingsForm()
+        form.equipment.choices = []
+        form.target.choices = []
+
+        for equipment in Equipment.query.all():
+            form.equipment.choices.append(equipment.name)
+
+        for target in Target.query.all():
+            form.target.choices.append(target.name)
+
+        if form.validate_on_submit():
+            user = User.query.get(session['user_id'])
+            user.work_length = form.work_length.data
+            user.break_length = form.break_length.data
+
+            for selection in form.equipment.data:
+                equipment = Equipment.query.filter_by(name=selection).one()
+                user.equipment = []
+                user.equipment.append(equipment)
+            
+            for selection in form.target.data:
+                target = Target.query.filter_by(name=selection).one()
+                user.targets = []
+                user.targets.append(target)
+
+            db.session.add(user)
+            db.session.commit()
+        
+        return render_template('settings.html', form=form)
+    else:
+        return redirect('/')
 
 @app.errorhandler(500)
 def server_error(err):
