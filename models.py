@@ -48,6 +48,21 @@ class User(db.Model):
         else:
             return False
 
+class Exercise(db.Model):
+    "Exercise model"
+
+    __tablename__ = "exercises"
+
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    name = db.Column(db.String())
+    gif_url = db.Column(db.String())
+    instructions = db.Column(db.ARRAY(db.String))
+    equipment_id = db.Column(db.Integer,
+                             db.ForeignKey('equipment.id'))
+    target_id = db.Column(db.Integer,
+                          db.ForeignKey('targets.id'))
+
 class Equipment(db.Model):
     "Equipment model"
 
