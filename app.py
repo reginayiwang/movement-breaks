@@ -1,6 +1,6 @@
 """Flask app for Movement Breaks (productivity timer with guided exercise breaks)"""
 
-from flask import Flask, render_template, jsonify, abort, redirect, session
+from flask import Flask, render_template, jsonify, abort, redirect, session, request
 from models import db, connect_db, User, Equipment, Target
 from forms import RegisterForm, LoginForm, SettingsForm
 from sqlalchemy.exc import IntegrityError
@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///movement_breaks'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ECHO'] = True
+# app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = config.secret_key
 
 base_url = 'https://exercisedb.p.rapidapi.com/exercises'
@@ -80,28 +80,32 @@ def logout_user():
 @app.route('/settings', methods=['GET', 'POST'])
 def change_settings():
     if 'user_id' in session:
+        user = User.query.get(session['user_id'])
         form = SettingsForm()
-        form.equipment.choices = []
-        form.target.choices = []
+        form.equipment.choices = [(equipment.id, equipment.name) for equipment in Equipment.query.all()]
+        form.targets.choices = [(target.id, target.name) for target in Target.query.all()]
 
-        for equipment in Equipment.query.all():
-            form.equipment.choices.append(equipment.name)
+        # Prepopulate form with current settings. This is done manually because passing user to obj does not work for multiselect fields
+        if request.method == 'GET':
+            form.equipment.default = [equipment.id for equipment in user.equipment]
+            form.targets.default = [target.id for target in user.targets]
+            form.process()
 
-        for target in Target.query.all():
-            form.target.choices.append(target.name)
+            # form.process() clears out other prepopulated fields, so we populate these after
+            form.work_length.data = user.work_length
+            form.break_length.data = user.break_length
 
         if form.validate_on_submit():
-            user = User.query.get(session['user_id'])
             user.work_length = form.work_length.data
             user.break_length = form.break_length.data
 
             for selection in form.equipment.data:
-                equipment = Equipment.query.filter_by(name=selection).one()
+                equipment = Equipment.query.get(selection)
                 user.equipment = []
                 user.equipment.append(equipment)
             
-            for selection in form.target.data:
-                target = Target.query.filter_by(name=selection).one()
+            for selection in form.targets.data:
+                target = Target.query.get(selection)
                 user.targets = []
                 user.targets.append(target)
 

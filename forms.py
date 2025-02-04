@@ -13,5 +13,5 @@ class LoginForm(FlaskForm):
 class SettingsForm(FlaskForm):
     work_length = IntegerField("Work Length (minutes)")
     break_length = IntegerField("Break Length (minutes)")
-    equipment = SelectMultipleField("Equipment")
-    target = SelectMultipleField("Exercise Targets")
+    equipment = SelectMultipleField("Equipment", coerce=int)
+    targets = SelectMultipleField("Exercise Targets", coerce=int)
