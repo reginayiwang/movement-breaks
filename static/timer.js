@@ -6,6 +6,7 @@ const $exerciseCont = $('.exercise-container')
 const $exerciseName = $('#exercise-name');
 const $exerciseImg = $('#exercise-img');
 const $instructions = $('#exercise-instructions');
+const $alert = $('.alert');
 
 let secLeft;
 let interval;
@@ -16,6 +17,9 @@ let workPhase = true;
 function startTimer() {
     $(this).prop('disabled', true); 
     secLeft = (workPhase ? workMins : breakMins) * 60;
+
+    // Uncomment for quicker testing
+    // secLeft = 5
     interval = setInterval(countDown, 1000);
 }
 
@@ -55,12 +59,15 @@ async function startExerciseBreak() {
     startTimer();
     try {
         res = await axios.get('./exercises');
-        exercises = _.shuffle(res.data);
+        exercises = _.shuffle(res.data.exercises);
+        if (!res.data.exercises_found) {
+            showAlert('warning', 'No exercises found for current equipment/target settings. Please try adjusting your selections. Displaying default bodyweight exercises.')
+        }
         exerciseIdx = 0;
         showNextExercise();
     } catch (e) {
-        // TO DO: Add error messaging to page
-        console.log(e);
+        showAlert('danger', 'Could not retrieve exercises.')
+        console.error(e);
     }
 }
 
@@ -77,7 +84,16 @@ function showNextExercise() {
     exerciseIdx++;
 }
 
+function showAlert(type, message) {
+    $alert.attr("class", `alert alert-${type}`);
+    $alert.text(message);
+    $alert.show()
+}
+
 $startButton.on('click', startTimer);
 $resetButton.on('click', resetTimer);
 $nextButton.on('click', showNextExercise);
-$( document ).ready(() => displayTime(workMins * 60));
+$( document ).ready(() => {
+    $alert.hide();
+    displayTime(workMins * 60);
+});

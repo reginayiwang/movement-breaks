@@ -62,6 +62,16 @@ class Exercise(db.Model):
                              db.ForeignKey('equipment.id'))
     target_id = db.Column(db.Integer,
                           db.ForeignKey('targets.id'))
+    equipment = db.relationship('Equipment', backref='exercises')
+    target = db.relationship('Target', backref='target')
+
+    def serialize(self):
+       """Return serialized Exercise"""
+       return {
+           'name': self.name,
+           'gifUrl': self.gif_url,
+           'instructions': self.instructions
+       }
 
 class Equipment(db.Model):
     "Equipment model"

@@ -1,7 +1,7 @@
 """Flask app for Movement Breaks (productivity timer with guided exercise breaks)"""
 
-from flask import Flask, render_template, jsonify, abort, redirect, session, request
-from models import db, connect_db, User, Equipment, Target
+from flask import Flask, render_template, jsonify, abort, redirect, session, request, flash
+from models import db, connect_db, User, Equipment, Target, Exercise
 from forms import RegisterForm, LoginForm, SettingsForm
 from sqlalchemy.exc import IntegrityError
 import requests
@@ -29,14 +29,33 @@ def show_timer():
 
 @app.route('/exercises')
 def get_exercises():
-    params = {
-        'limit': 0
-    }
-    try:
-        exercises = requests.get(f"{base_url}/equipment/body weight", headers=headers, params=params)
-        return jsonify(exercises.json())
-    except:
-        abort(500)
+    bodyweight_id = Equipment.query.filter(Equipment.name == 'body weight').one().id
+    exercises_found = True
+
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user:
+            # Filter exercises for user equipment preferences, default to body weight only
+            equip_ids = [equip.id for equip in user.equipment] if user.equipment else [bodyweight_id]
+            exercise_query = Exercise.query.filter(Exercise.equipment_id.in_(equip_ids))
+
+            # Filter for user target preferences if present
+            target_ids = [target.id for target in user.targets]
+            if target_ids:
+                exercise_query = exercise_query.filter(Exercise.target_id.in_(target_ids))
+            
+            exercises = [exercise.serialize() for exercise in exercise_query.all()]
+            
+            if exercises:
+                return jsonify({'exercises_found': exercises_found,
+                                'exercises': exercises})
+            else:
+                exercises_found = False
+
+    # Return body weight exercises if not logged in or if filtering failed to retrieve exercises
+    exercises = [exercise.serialize() for exercise in Equipment.query.get(bodyweight_id).exercises]
+    return jsonify({'exercises_found': exercises_found,
+                    'exercises': exercises})
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
