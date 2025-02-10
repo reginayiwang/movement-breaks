@@ -74,7 +74,7 @@ class UserModelTestCase(TestCase):
     """Test User model"""
 
     def setUp(self):
-        """Clear data before each test"""
+        """Clear data before each test, set up test user"""
         db.drop_all()
         db.create_all()
 
