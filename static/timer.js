@@ -16,8 +16,13 @@ let currExerciseId;
 let exerciseIdx = 0;
 let workPhase = true;
 
+/**
+ * Start timer count down 
+ */
 function startTimer() {
     $(this).prop('disabled', true); 
+
+    // Set time in seconds based on whether it is a work phase or break phase
     secLeft = (workPhase ? workMins : breakMins) * 60;
 
     // Uncomment for quicker testing
@@ -25,9 +30,12 @@ function startTimer() {
     interval = setInterval(countDown, 1000);
 }
 
+/**
+ * Handle timer count down, switching phases when hitting 0.
+ */
 function countDown() {
     secLeft--;
-    displayTime(secLeft);
+    $timerDisplay.text(formatTime(secLeft));
     
     if (secLeft === 0) {
         clearInterval(interval);
@@ -38,10 +46,9 @@ function countDown() {
     }
 }
 
-function displayTime(seconds) {
-    $timerDisplay.text(formatTime(seconds));
-}
-
+/**
+ * Return string converting seconds into HH:MM:SS format
+ */
 function formatTime(seconds) {
     hours = Math.floor(seconds / 3600);
     mins = Math.floor((seconds % 3600) / 60);
@@ -50,6 +57,9 @@ function formatTime(seconds) {
     return (hours ? `${hours}:` : '') + (mins >= 10 ? `${mins}:` : `0${mins}:`) +  (secs >= 10 ? `${secs}` : `0${secs}`); 
 }
 
+/**
+ * Reset timer to work phase
+ */
 function resetTimer() {
     $exerciseCont.hide();
     $startButton.prop('disabled', false);
@@ -57,6 +67,9 @@ function resetTimer() {
     clearInterval(interval);
 }
 
+/**
+ * Start exercise phase
+ */
 async function startExerciseBreak() {
     startTimer();
     exerciseIdx = 0;
@@ -66,6 +79,10 @@ async function startExerciseBreak() {
     } 
 }
 
+/**
+ * Return exercises fetched from database
+ * Show alerts if exercises were not found for current settings, or for error retrieving exercises
+ */
 async function fetchExercises() {
     try {
         res = await axios.get('./exercises');
@@ -79,6 +96,9 @@ async function fetchExercises() {
     }
 }
 
+/**
+ * Display next exercise in exercises lsit
+ */
 function showNextExercise() {
     exercise = exercises[exerciseIdx % exercises.length];
     currExerciseId = exercise['id']
@@ -93,12 +113,19 @@ function showNextExercise() {
     exerciseIdx++;
 }
 
+/**
+ * Display alert styled for given type with given message
+ */
 function showAlert(type, message) {
     $alert.attr("class", `alert alert-${type} alert-dismissable fade show`);
     $alert.find('#alert-message').text(message);
     $alert.show()
 }
 
+/**
+ * Block current exercise
+ * Blocked exercises will not show up in future exercise breaks unless no exercises are found for current settings
+ */
 async function blockExercise() {
     try {
         res = await axios.post(`./users/${userId}/block`, {exercise_id: currExerciseId});

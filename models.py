@@ -33,7 +33,7 @@ class User(db.Model):
 
     @classmethod
     def register(cls, username, password):
-        """Register new user"""
+        """Register new user with hashed password"""
 
         password_hash = bcrypt.generate_password_hash(password).decode("utf8")
         return cls(username=username, password_hash=password_hash)
@@ -42,7 +42,7 @@ class User(db.Model):
     def login(cls, username, password):
         """Handle user authentication"""
 
-        user = User.query.filter_by(username=username).one()
+        user = User.query.filter_by(username=username).first()
 
         if user and bcrypt.check_password_hash(user.password_hash, password):
             return user
@@ -76,7 +76,7 @@ class Exercise(db.Model):
        }
     
 class BlockedExercise(db.Model):
-    "BlockedExercise model"
+    "Model for BlockedExercise linking many-to-many relationship between User and Exercise"
 
     __tablename__ = "blocked_exercises"
     user_id = db.Column(db.Integer,
@@ -107,7 +107,7 @@ class Target(db.Model):
                      unique=True)
 
 class EquipmentPreferences(db.Model):
-    "EquipmentPreference model"
+    "Model linking many-to-many relationship between User and Equipment"
 
     __tablename__ = "equipment_preferences" 
 
@@ -119,7 +119,7 @@ class EquipmentPreferences(db.Model):
                              primary_key=True)
     
 class TargetPreferences(db.Model):
-    "TargetPreference model"
+    "Model linking many-to-many relationship between User and Target"
 
     __tablename__ = "target_preferences"
 

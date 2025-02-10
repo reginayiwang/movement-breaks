@@ -1,34 +1,36 @@
 """Flask app for Movement Breaks (productivity timer with guided exercise breaks)"""
 
-from flask import Flask, render_template, jsonify, abort, redirect, session, request, flash
+from flask import Flask, render_template, jsonify, redirect, session, request
 from models import db, connect_db, User, Equipment, Target, Exercise, BlockedExercise
 from forms import RegisterForm, LoginForm, SettingsForm
 from sqlalchemy.exc import IntegrityError
-import requests
 import config
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///movement_breaks'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_ECHO'] = False
 app.config['SECRET_KEY'] = config.secret_key
-
-base_url = 'https://exercisedb.p.rapidapi.com/exercises'
-headers = {
-    'x-rapidapi-host': 'exercisedb.p.rapidapi.com',
-    'x-rapidapi-key': config.api_key
-}
 
 connect_db(app)
 
 @app.route('/')
 def show_timer():
+    """Display timer/home page"""
     user = User.query.get(session['user_id']) if 'user_id' in session else None
     return render_template('timer.html', user=user) 
 
 @app.route('/exercises')
 def get_exercises():
+    """
+    Return query status and exercises, filtering for user's preferences if logged in.
+
+    Users that are not logged in will only be shown body weight exercises.
+
+    exercises_found indicates whether exercises were found that fulfill all user preferences.
+    If exercises_found is False, all body weight exercises will be returned as a default instead.
+    """
     bodyweight_id = Equipment.query.filter(Equipment.name == 'body weight').one().id
     exercises_found = True
 
@@ -63,6 +65,7 @@ def get_exercises():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
+    """Register new user, redirecting to home page on success"""
     form = RegisterForm()
     if form.validate_on_submit():
         username = form.username.data
@@ -83,6 +86,8 @@ def register_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_user():
+    """Authenticate user details and handle login"""
+
     form = LoginForm()
     if form.validate_on_submit():
         username = form.username.data
@@ -97,11 +102,19 @@ def login_user():
 
 @app.route('/logout')
 def logout_user():
+    """Handle logout"""
+
     session.pop('user_id')
     return redirect('/')
 
 @app.route('/settings', methods=['GET', 'POST'])
 def change_settings():
+    """
+    Change user settings for timer length and exercise preferences.
+
+    Requires logged in user, otherwise redirects to home page. 
+    """
+
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
         form = SettingsForm()
@@ -141,13 +154,14 @@ def change_settings():
     
 @app.route('/users/<int:user_id>/block', methods=['POST'])
 def block_exercise(user_id):
+    """
+    Add an exercise to user's blocked exercises list
+    """
+
+    # Verify that user is logged in and adding a block to their own account
     if 'user_id' in session and user_id == session['user_id']:
         block = BlockedExercise(user_id=user_id, exercise_id=request.json.get('exercise_id'))
         db.session.add(block)
         db.session.commit()
         return (jsonify(message="Blocked exercise"), 201)
     return (jsonify(message="Unauthorized"), 401)
-
-@app.errorhandler(500)
-def server_error(err):
-    return "Sorry, something went wrong", 500
