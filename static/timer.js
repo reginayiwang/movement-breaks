@@ -8,6 +8,7 @@ const $exerciseName = $('#exercise-name');
 const $exerciseImg = $('#exercise-img');
 const $instructions = $('#exercise-instructions');
 const $alert = $('.alert');
+const $header = $('h1')
 
 let secLeft;
 let interval;
@@ -51,7 +52,6 @@ function countDown() {
  * Play alarm sound
  */
 function playSound() {
-    console.log('playing sound')
     let ding = new Audio('https://cdn.freesound.org/previews/22/22627_7037-lq.mp3');
     ding.play();
 }
@@ -74,6 +74,7 @@ function resetTimer() {
     $exerciseCont.hide();
     $startButton.prop('disabled', false);
     $timerDisplay.text(formatTime(workMins * 60));
+    $header.text("Let's get to work!")
     clearInterval(interval);
 }
 
@@ -82,6 +83,7 @@ function resetTimer() {
  */
 async function startExerciseBreak() {
     startTimer();
+    $header.text('Get up and take a break!')
     exerciseIdx = 0;
     exercises = await fetchExercises();
     if (exercises) {
