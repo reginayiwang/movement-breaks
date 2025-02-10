@@ -27,7 +27,7 @@ function startTimer() {
     secLeft = (workPhase ? workMins : breakMins) * 60;
 
     // Uncomment for quicker testing
-    secLeft = 5
+    // secLeft = 5
     interval = setInterval(countDown, 1000);
 }
 
@@ -166,6 +166,9 @@ $resetButton.on('click', resetTimer);
 $blockButton.on('click', blockExercise);
 $nextButton.on('click', showNextExercise);
 $( document ).ready(() => {
+    if (!userId) {
+        $blockButton.hide();
+    }
     $alert.hide();
     $timerDisplay.text(formatTime(workMins * 60));
 });

@@ -40,6 +40,7 @@
         let workMins = {{ user.work_length|tojson }};
         let breakMins = {{ user.break_length|tojson }};
     {% else %}
+        let userId = null;
         let workMins = 60;
         let breakMins = 5;
     {% endif %}
