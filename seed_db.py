@@ -1,15 +1,15 @@
 """Seed database with equipment and exercise targets from API"""
 
 from app import app
+import os
 import requests
 import sys
 from models import db, Equipment, Target, Exercise
-import config
 
 base_url = 'https://exercisedb.p.rapidapi.com/exercises'
 headers = {
     'x-rapidapi-host': 'exercisedb.p.rapidapi.com',
-    'x-rapidapi-key': config.api_key
+    'x-rapidapi-key': os.environ.get('API_KEY')
 }
 
 db.drop_all()
