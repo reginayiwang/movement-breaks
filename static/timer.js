@@ -1,6 +1,7 @@
 const $startButton = $('#start-button');
 const $resetButton = $('#reset-button');
 const $nextButton = $('#next-button')
+const $blockButton = $('#block-button')
 const $timerDisplay = $('#timer');
 const $exerciseCont = $('.exercise-container')
 const $exerciseName = $('#exercise-name');
@@ -11,6 +12,7 @@ const $alert = $('.alert');
 let secLeft;
 let interval;
 let exercises;
+let currExerciseId;
 let exerciseIdx = 0;
 let workPhase = true;
 
@@ -57,14 +59,20 @@ function resetTimer() {
 
 async function startExerciseBreak() {
     startTimer();
+    exerciseIdx = 0;
+    exercises = await fetchExercises();
+    if (exercises) {
+        showNextExercise();
+    } 
+}
+
+async function fetchExercises() {
     try {
         res = await axios.get('./exercises');
-        exercises = _.shuffle(res.data.exercises);
         if (!res.data.exercises_found) {
             showAlert('warning', 'No exercises found for current equipment/target settings. Please try adjusting your selections. Displaying default bodyweight exercises.')
         }
-        exerciseIdx = 0;
-        showNextExercise();
+        return _.shuffle(res.data.exercises);
     } catch (e) {
         showAlert('danger', 'Could not retrieve exercises.')
         console.error(e);
@@ -73,6 +81,7 @@ async function startExerciseBreak() {
 
 function showNextExercise() {
     exercise = exercises[exerciseIdx % exercises.length];
+    currExerciseId = exercise['id']
     $exerciseImg.attr('src', exercise['gifUrl']);
     $exerciseImg.attr('alt', exercise['name']);
     $exerciseName.text(exercise['name']);
@@ -85,13 +94,37 @@ function showNextExercise() {
 }
 
 function showAlert(type, message) {
-    $alert.attr("class", `alert alert-${type}`);
-    $alert.text(message);
+    $alert.attr("class", `alert alert-${type} alert-dismissable fade show`);
+    $alert.find('#alert-message').text(message);
     $alert.show()
+}
+
+async function blockExercise() {
+    try {
+        res = await axios.post(`./users/${userId}/block`, {exercise_id: currExerciseId});
+        if (res.status === 201) {
+            exerciseIdx--;
+            exercises.splice(exerciseIdx, 1);
+
+            // Fetch new exercises (will default to bodyweight exercises) if blocking leads to no exercises left
+            if (exercises.length === 0) {
+                exerciseIdx = 0;
+                exercises = await fetchExercises();
+            }
+
+            showNextExercise();
+        } else {
+            showAlert('danger', 'Unauthorized to block exercise.')
+        }
+    } catch (e) {
+        showAlert('danger', 'Could not block exercise.')
+        console.error(e);
+    }
 }
 
 $startButton.on('click', startTimer);
 $resetButton.on('click', resetTimer);
+$blockButton.on('click', blockExercise);
 $nextButton.on('click', showNextExercise);
 $( document ).ready(() => {
     $alert.hide();

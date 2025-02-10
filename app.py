@@ -1,7 +1,7 @@
 """Flask app for Movement Breaks (productivity timer with guided exercise breaks)"""
 
 from flask import Flask, render_template, jsonify, abort, redirect, session, request, flash
-from models import db, connect_db, User, Equipment, Target, Exercise
+from models import db, connect_db, User, Equipment, Target, Exercise, BlockedExercise
 from forms import RegisterForm, LoginForm, SettingsForm
 from sqlalchemy.exc import IntegrityError
 import requests
@@ -35,9 +35,13 @@ def get_exercises():
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
         if user:
-            # Filter exercises for user equipment preferences, default to body weight only
+            # Filter exercises for user equipment preferences, default to bodyweight only
             equip_ids = [equip.id for equip in user.equipment] if user.equipment else [bodyweight_id]
             exercise_query = Exercise.query.filter(Exercise.equipment_id.in_(equip_ids))
+
+            # Filter out blocked exercises
+            blocked_ids = [equip.id for equip in user.blocked_exercises]
+            exercise_query = exercise_query.filter(Exercise.id.not_in(blocked_ids))
 
             # Filter for user target preferences if present
             target_ids = [target.id for target in user.targets]
@@ -134,6 +138,15 @@ def change_settings():
         return render_template('settings.html', form=form)
     else:
         return redirect('/')
+    
+@app.route('/users/<int:user_id>/block', methods=['POST'])
+def block_exercise(user_id):
+    if 'user_id' in session and user_id == session['user_id']:
+        block = BlockedExercise(user_id=user_id, exercise_id=request.json.get('exercise_id'))
+        db.session.add(block)
+        db.session.commit()
+        return (jsonify(message="Blocked exercise"), 201)
+    return (jsonify(message="Unauthorized"), 401)
 
 @app.errorhandler(500)
 def server_error(err):

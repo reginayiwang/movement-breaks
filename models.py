@@ -29,6 +29,7 @@ class User(db.Model):
     break_length = db.Column(db.Integer, default=5)
     equipment = db.relationship('Equipment', secondary='equipment_preferences', cascade='all, delete')
     targets = db.relationship('Target', secondary='target_preferences', cascade='all, delete')
+    blocked_exercises = db.relationship('Exercise', secondary='blocked_exercises', cascade='all, delete')
 
     @classmethod
     def register(cls, username, password):
@@ -68,10 +69,22 @@ class Exercise(db.Model):
     def serialize(self):
        """Return serialized Exercise"""
        return {
+           'id': self.id,
            'name': self.name,
            'gifUrl': self.gif_url,
            'instructions': self.instructions
        }
+    
+class BlockedExercise(db.Model):
+    "BlockedExercise model"
+
+    __tablename__ = "blocked_exercises"
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.id'), 
+                        primary_key=True)
+    exercise_id = db.Column(db.Integer,
+                             db.ForeignKey('exercises.id'),
+                             primary_key=True)
 
 class Equipment(db.Model):
     "Equipment model"
