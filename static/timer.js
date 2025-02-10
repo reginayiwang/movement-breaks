@@ -26,7 +26,7 @@ function startTimer() {
     secLeft = (workPhase ? workMins : breakMins) * 60;
 
     // Uncomment for quicker testing
-    // secLeft = 5
+    secLeft = 5
     interval = setInterval(countDown, 1000);
 }
 
@@ -39,11 +39,21 @@ function countDown() {
     
     if (secLeft === 0) {
         clearInterval(interval);
+        playSound();
         workPhase = !workPhase;
         if (!workPhase) {
             startExerciseBreak();
         }
     }
+}
+
+/**
+ * Play alarm sound
+ */
+function playSound() {
+    console.log('playing sound')
+    let ding = new Audio('https://cdn.freesound.org/previews/22/22627_7037-lq.mp3');
+    ding.play();
 }
 
 /**
@@ -63,7 +73,7 @@ function formatTime(seconds) {
 function resetTimer() {
     $exerciseCont.hide();
     $startButton.prop('disabled', false);
-    displayTime(workMins * 60);
+    $timerDisplay.text(formatTime(workMins * 60));
     clearInterval(interval);
 }
 
@@ -155,5 +165,5 @@ $blockButton.on('click', blockExercise);
 $nextButton.on('click', showNextExercise);
 $( document ).ready(() => {
     $alert.hide();
-    displayTime(workMins * 60);
+    $timerDisplay.text(formatTime(workMins * 60));
 });
