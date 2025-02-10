@@ -41,18 +41,15 @@ def get_exercises():
             # Filter exercises for user equipment preferences, default to bodyweight only
             equip_ids = [equip.id for equip in user.equipment] if user.equipment else [bodyweight_id]
             exercise_query = Exercise.query.filter(Exercise.equipment_id.in_(equip_ids))
-            print("filter for equipment", len(exercise_query.all()))
 
             # Filter out blocked exercises
             blocked_ids = [equip.id for equip in user.blocked_exercises]
             exercise_query = exercise_query.filter(Exercise.id.not_in(blocked_ids))
-            print("filter out blocks", len(exercise_query.all()))
 
             # Filter for user target preferences if present
             target_ids = [target.id for target in user.targets]
             if target_ids:
                 exercise_query = exercise_query.filter(Exercise.target_id.in_(target_ids))
-            print("filter for target", len(exercise_query.all()))
             
             exercises = [exercise.serialize() for exercise in exercise_query.all()]
             

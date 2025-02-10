@@ -119,7 +119,7 @@ function showNextExercise() {
     $exerciseName.text(exercise['name']);
     $instructions.empty();
     for (let ins of exercise['instructions']) {
-        $instructions.append($(`<li>${ins}</li>`));
+        $instructions.append($(`<li class="list-group-item">${ins}</li>`));
     }
     $exerciseCont.show();
     exerciseIdx++;

@@ -5,19 +5,26 @@
 {% block content %}
 <div class="timer-container container-fluid mb-3">
     <p class="text-center display-1 mt-4" id="timer"></p>
-    <div class="d-flex justify-content-center timer-controls">
+    <div class="d-flex justify-content-center timer-controls gap-2">
         <button class="btn btn-secondary" id="start-button">Start</button>
         <button class="btn btn-secondary" id="reset-button">Reset</button>
     </div>
 </div>
 
-<div class="exercise-container" style="display: none">
-    <div class="d-flex flex-column justify-content-center align-items-center">
-        <img id=exercise-img src="" alt="">
-        <h2 id="exercise-name"></h2>
-        <ul id="exercise-instructions"></ul>
-        <button class="btn btn-secondary" id="block-button">Block Exercise</button>
-        <button class="btn btn-secondary" id="next-button">Next Exercise</button>
+<div class="exercise-container mt-2" style="display: none">
+    <div class="d-flex justify-content-center">
+        <div>
+            <img id=exercise-img src="" alt="">
+            <div class="d-flex justify-content-center gap-2">
+                <button class="btn btn-danger" id="block-button"><i class="fa fa-ban"></i> Block</button>
+                <button class="btn btn-secondary" id="next-button"><i class="fa fa-forward"></i> Next</button>
+            </div>
+        </div>
+
+        <div class="exercise-info">
+            <h2 id="exercise-name"></h2>
+            <ul class="list-group" id="exercise-instructions"></ul>
+        </div>
     </div> 
 </div>
 <script
