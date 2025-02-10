@@ -41,15 +41,18 @@ def get_exercises():
             # Filter exercises for user equipment preferences, default to bodyweight only
             equip_ids = [equip.id for equip in user.equipment] if user.equipment else [bodyweight_id]
             exercise_query = Exercise.query.filter(Exercise.equipment_id.in_(equip_ids))
+            print("filter for equipment", len(exercise_query.all()))
 
             # Filter out blocked exercises
             blocked_ids = [equip.id for equip in user.blocked_exercises]
             exercise_query = exercise_query.filter(Exercise.id.not_in(blocked_ids))
+            print("filter out blocks", len(exercise_query.all()))
 
             # Filter for user target preferences if present
             target_ids = [target.id for target in user.targets]
             if target_ids:
                 exercise_query = exercise_query.filter(Exercise.target_id.in_(target_ids))
+            print("filter for target", len(exercise_query.all()))
             
             exercises = [exercise.serialize() for exercise in exercise_query.all()]
             
@@ -136,14 +139,14 @@ def change_settings():
             user.work_length = form.work_length.data
             user.break_length = form.break_length.data
 
+            user.equipment = []
             for selection in form.equipment.data:
                 equipment = Equipment.query.get(selection)
-                user.equipment = []
                 user.equipment.append(equipment)
             
+            user.targets = []
             for selection in form.targets.data:
                 target = Target.query.get(selection)
-                user.targets = []
                 user.targets.append(target)
 
             db.session.add(user)
