@@ -1,5 +1,6 @@
 """Flask app for Movement Breaks (productivity timer with guided exercise breaks)"""
 
+import os
 from flask import Flask, render_template, jsonify, redirect, session, request
 from models import db, connect_db, User, Equipment, Target, Exercise, BlockedExercise
 from forms import RegisterForm, LoginForm, SettingsForm
@@ -8,7 +9,7 @@ import config
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///movement_breaks'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql:///movement_breaks')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SECRET_KEY'] = config.secret_key

@@ -56,15 +56,18 @@ class Exercise(db.Model):
 
     id = db.Column(db.Integer,
                    primary_key=True)
-    name = db.Column(db.String())
-    gif_url = db.Column(db.String())
-    instructions = db.Column(db.ARRAY(db.String))
+    name = db.Column(db.String(),
+                     nullable=False)
+    gif_url = db.Column(db.String(),
+                        nullable=False)
+    instructions = db.Column(db.ARRAY(db.String),
+                             nullable=False)
     equipment_id = db.Column(db.Integer,
                              db.ForeignKey('equipment.id'))
     target_id = db.Column(db.Integer,
                           db.ForeignKey('targets.id'))
     equipment = db.relationship('Equipment', backref='exercises')
-    target = db.relationship('Target', backref='target')
+    target = db.relationship('Target', backref='exercises')
 
     def serialize(self):
        """Return serialized Exercise"""
@@ -94,7 +97,8 @@ class Equipment(db.Model):
     id = db.Column(db.Integer,
                    primary_key=True)
     name = db.Column(db.String(30),
-                     unique=True)
+                     unique=True,
+                     nullable=False)
 
 class Target(db.Model):
     "Target (exercise target body part/type) model"
@@ -104,7 +108,8 @@ class Target(db.Model):
     id = db.Column(db.Integer,
                    primary_key=True)
     name = db.Column(db.String(30),
-                     unique=True)
+                     unique=True,
+                     nullable=False)
 
 class EquipmentPreferences(db.Model):
     "Model linking many-to-many relationship between User and Equipment"
