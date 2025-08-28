@@ -1,6 +1,4 @@
 # Movement Breaks
-Add link here after it's deployed
-
 Sitting all day is not good for your health, and most people are not moving much while they work (or sometimes when they aren’t working too!). Movement Breaks is a customizable productivity timer to encourage focusing for a specified period of time, and then taking breaks to move around by following suggested exercises. 
 
 ![Image of Movement Breaks](project_info/screenshot.png "Movement Breaks")
